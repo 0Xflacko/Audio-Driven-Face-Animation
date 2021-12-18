@@ -1,0 +1,17 @@
+ffmpeg -i video4.mp4 -ac 1 -f wav -map 0:a audio4.wav
+ffmpeg -i video5.mp4 -ac 1 -f wav -map 0:a audio5.wav
+ffmpeg -i video6.mp4 -ac 1 -f wav -map 0:a audio6.wav
+ffmpeg -i video7.mp4 -ac 1 -f wav -map 0:a audio7.wav
+ffmpeg -i video8.mp4 -ac 1 -f wav -map 0:a audio8.wav
+ffmpeg -i video9.mp4 -ac 1 -f wav -map 0:a audio9.wav
+ffmpeg -i video10.mp4 -ac 1 -f wav -map 0:a audio10.wav
+ffmpeg -i video11.mp4 -ac 1 -f wav -map 0:a audio11.wav
+ffmpeg -i video12.mp4 -ac 1 -f wav -map 0:a audio12.wav
+ffmpeg -i video13.mp4 -ac 1 -f wav -map 0:a audio13.wav
+ffmpeg -i video14.mp4 -ac 1 -f wav -map 0:a audio14.wav
+ffmpeg -i video15.mp4 -ac 1 -f wav -map 0:a audio15.wav
+ffmpeg -i video16.mp4 -ac 1 -f wav -map 0:a audio16.wav
+ffmpeg -i video17.mp4 -ac 1 -f wav -map 0:a audio17.wav
+ffmpeg -i video18.mp4 -ac 1 -f wav -map 0:a audio18.wav
+ffmpeg -i video19.mp4 -ac 1 -f wav -map 0:a audio19.wav
+ffmpeg -i video20.mp4 -ac 1 -f wav -map 0:a audio20.wav

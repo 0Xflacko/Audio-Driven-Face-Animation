@@ -1,0 +1,6 @@
+References
+1. https://research.nvidia.com/publication/2017-07_Audio-Driven-Facial-Animation
+
+2. https://paperswithcode.com/paper/few-shot-adversarial-learning-of-realistic
+
+3. 
