@@ -2,16 +2,11 @@ import face_alignment
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-
-from python_speech_features import mfcc
-from python_speech_features import delta
-from python_speech_features import logfbank
-import python_speech_features
-import scipy.io.wavfile as wav
 import torch
 import os
 from skimage import io
 import collections
+
 
 # Function os.scandir() iterates through a folder
 # Providing the path of the directory
@@ -24,6 +19,18 @@ fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, device='cpu'
 
 def fun(det):
     return [tuple(i) for i in det]
+
+def crop_square(img, size, interpolation=cv2.INTER_AREA):
+    h, w = img.shape[:2]
+    min_size = np.amin([h,w])
+
+    # Centralize and crop
+    crop_img = img[int(h/2-min_size/2):int(h/2+min_size/2), int(w/2-min_size/2):int(w/2+min_size/2)]
+    resized = cv2.resize(crop_img, (size, size), interpolation=interpolation)
+
+    return resized
+
+
 
 i = 0
 j = 0
@@ -47,15 +54,15 @@ for file in os.scandir(dirloc):
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
         fps = int(cap.get(5))
-        print('Width %d'%frame_width)
-        print('Height %d'%frame_height)
-        print('fps %d'%fps)
+        #print('Width %d'%frame_width)
+        #print('Height %d'%frame_height)
+        #print('fps %d'%fps)
 
         # Define the codec and create VideoWriter object.The
         # output is stored in 'outpy.avi' file.
         #out = cv2.VideoWriter('outpy.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),10, (frame_width, frame_height))
         i = 1
-        j = 1
+        j = 0
         # Read until video is completed
         while(True):
             # Capture frame-by-frame
@@ -66,7 +73,7 @@ for file in os.scandir(dirloc):
                 #Run facial detection
 
                 det = fa.get_landmarks_from_image(frame_temp)#Process entire directory in one go
-                
+
                ## plot_style = dict(marker='o',
                   ##                  markersize=4,
                     ##                linestyle='-',
@@ -95,11 +102,11 @@ for file in os.scandir(dirloc):
                       ##      color=det_type.color, **plot_style)
 
                 ##ax.axis('off')
-                #index = 0
+                index = 0
                 #for detection in det[0]:
                    # print(detection[0])
-                    #cv2.circle(frame,(int(detection[0]), int(detection[1])), 10, (255,0,0), -1)
-                   # cv2.putText(frame, '%0d'%index, (int(detection[0]), int(detection[1])), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1 ,(0,0,255), 2)
+                   # cv2.circle(frame,(int(detection[0]), int(detection[1])), 10, (255,0,0), -1)
+                    #cv2.putText(frame, '%0d'%index, (int(detection[0]), int(detection[1])), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1 ,(0,0,255), 2)
                    # index = index+1
 
                 
@@ -111,10 +118,12 @@ for file in os.scandir(dirloc):
                 lst_left_eye = [det[0][36], det[0][37], det[0][38], det[0][39], det[0][40], det[0][41]]
                 lst_right_eye = [det[0][42],det[0][43], det[0][44], det[0][45], det[0][46], det[0][47]]
 
+                
+
                 average_left_eye = Average(lst_left_eye)
                 average_right_eye = Average(lst_right_eye)
-                print("Average of the list = ", average_left_eye)
-                print("Average of the list = ", average_right_eye)
+                #print("Average of the list = ", average_left_eye)
+                #print("Average of the list = ", average_right_eye)
 
                 left_eye_x = average_left_eye[0]
                 left_eye_y = average_left_eye[1]
@@ -133,8 +142,11 @@ for file in os.scandir(dirloc):
                     #direction
                     direction = 1   
 
+                
+
                 delta_x = right_eye_x - left_eye_x
                 delta_y = right_eye_y - left_eye_y
+
                 angle = np.arctan(delta_y/delta_x)
                 angle = (angle * 180) / np.pi
 
@@ -153,20 +165,26 @@ for file in os.scandir(dirloc):
                 
 
                 #Crop the image and scale to 256x256
-                crop_img = rotated[200:1300, 200:875]
-               # cv2.imshow('mat', rotated)
+
+                # calculate distance between the eyes in the first image
+               # dist_1 = np.sqrt((delta_x * delta_x) + (delta_y * delta_y))
+
+                # calculate distance between the eyes in the second image
+                #dist_2 = np.sqrt((delta_x_1 * delta_x_1) + (delta_y_1 * delta_y_1))
+
                 
-                  
-                #cv2.namedWindow('mat', cv2.WINDOW_NORMAL)
-                #cv2.imshow('mat', crop_img)
-                dim = (255,255)
-                resized = cv2.resize(crop_img, dim)
+
+                dim = (256,256)
+                crop_img = rotated[200:1150, 0:1080]
+                #resized = crop_square(rotated, 256, interpolation=cv2.INTER_AREA)
+                resized = cv2.resize(crop_img, dim,interpolation=cv2.INTER_AREA)
+                #resized = cv2.resize(rotated,dim)
                 cv2.imshow('mat', resized)
 
                 
-                
+                #//SAVING PART//
                 name = './Dataset/' + file.name + '/images/%04d.png'%j
-                #print('Creating...' + name)
+                print('Creating...' + name)
                 os.makedirs('./Dataset/' + file.name + '/images/', exist_ok=True)
                 cv2.imwrite(name, resized)
                 j += 1                   
@@ -191,19 +209,6 @@ for file in os.scandir(dirloc):
             # Break the loop
             else:
                 break
-
-                #Sound Processing
-for file in os.scandir(dirloc):
-    if(file.path.endswith(".wav")) and file.is_file():
-      while(True):
-
-        (resized,sig) = wav.read()
-        mfcc_feat = mfcc(sig,resized)
-        d_mfcc_feat = delta(mfcc_feat, 2)
-        python_speech_features.base.mfcc(sig, samplerate=16000, winlen=0.025, winstep=0.01, numcep=13, nfilt=26, nfft=512,
-                                         lowfreq=0, highfreq=None, preemph=0.97, ceplifter=22, appendEnergy=True, winfunc= np.hamming)
-        fbank_feat = logfbank(sig,resized)
-        print(fbank_feat[1:3,:])
 
         # When everything done, release the video capture object
         cap.release()
